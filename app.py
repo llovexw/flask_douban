@@ -30,22 +30,21 @@ def login():
 
     #  此处暂时有bug，必须登录一次admin账户才能使其他账户生效(已解决)
     if user_dict.get(user, 0) and user_dict.get(user) == pwd:  # 这里可以根据数据库里的用户和密码来判断，因为是最简单的登录界面，数据库学的不是很好，所有没用。
-        session[user] = pwd
+        session['user_info'] = user
         return redirect('/index')
     else:
         return render_template('login.html', msg='用户名或密码输入错误')
 
-
 @app.before_request
 def before_request():
+    # user_info变成session中的健，可以随时访问
+    user_info = session.get('user_info')
+    print(user_info)
+    print(request.path)
     if request.path == '/' or request.path == '/login' or request.path == '/static/assets/css/Login.css':
         pass
     # 判断用户是否在数据库中
-    elif 'admin' in session:
-        pass
-    elif 'zhangsan' in session:
-        pass
-    elif 'lisi' in session:
+    elif user_info:
         pass
     else:
         return redirect('/login')
@@ -93,6 +92,12 @@ def word():
 @app.route('/team')
 def team():
     return render_template("team.html")
+
+# 添加了退出登录功能
+@app.route('/logout')
+def logout():
+    del session['user_info']
+    return render_template("login.html")
 
 if __name__ == '__main__':
     app.run(debug=True)     #debug=True 开启debug调试
